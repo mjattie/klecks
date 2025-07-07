@@ -293,7 +293,6 @@ export class KlApp {
         this.selectedStyle = { // Default selected style before fetch
             id: 'default-initial-style', // Added default ID
             name: 'van gogh',
-            // positivePrompt and negativePrompt removed by previous change
             imageUrl: '' // Placeholder image
         };
 
@@ -1685,7 +1684,7 @@ export class KlApp {
         }).catch(error => {
             console.error("Error fetching styles:", error);
             this.styleOptions = [];
-            this.selectedStyle = { name: 'Error', positivePrompt: '', negativePrompt: '', imageUrl: '' };
+            this.selectedStyle = { name: 'Error', id: 'error-id', imageUrl: '' };
             if (this.styleSelectionUi) {
                 this.styleSelectionUi.updateStyleSelection(this.styleOptions, this.selectedStyle);
             }
