@@ -1916,11 +1916,6 @@ export class KlApp {
             filterUi.getElement(),
             fileUi ? fileUi.getElement() : undefined,
             ] : [],
-            BB.el({
-                css: {
-                    height: '10px', // a bit of spacing at the bottom
-                },
-            }),
             this.bottomBarWrapper ? this.bottomBarWrapper : undefined,
         ]);
 
