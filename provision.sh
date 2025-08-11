@@ -146,7 +146,7 @@ function provisioning_get_nodes() {
             fi
         else
             printf "Downloading node: %s...\n" "${repo}"
-            git clone "${repo}" "${path}" --recursive
+            eval git clone $repo "\"${path}\"" --recursive
             if [[ -e $requirements ]]; then
                 pip_install -r "${requirements}"
             fi
