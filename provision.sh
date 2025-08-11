@@ -22,9 +22,9 @@ PIP_PACKAGES=(
 NODES=(
     "https://github.com/ltdrdata/ComfyUI-Manager"
     "https://github.com/cubiq/ComfyUI_essentials"
-	"https://github.com/cubiq/ComfyUI_InstantID"
-	"https://github.com/SeanScripts/ComfyUI-PixtralLlamaMolmoVision"
-	"--branch 8.17.1 https://github.com/ltdrdata/ComfyUI-Impact-Pack"
+    "https://github.com/cubiq/ComfyUI_InstantID"
+    "https://github.com/SeanScripts/ComfyUI-PixtralLlamaMolmoVision"
+    "--branch 8.17.1 https://github.com/ltdrdata/ComfyUI-Impact-Pack"
 )
 
 CHECKPOINT_MODELS=(
