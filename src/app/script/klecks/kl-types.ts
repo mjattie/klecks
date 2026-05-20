@@ -310,4 +310,5 @@ export interface Style {
     name: string;
     imageUrl: string;
     darkInvert?: boolean; // Optional: whether the image should be inverted in dark mode
+    styleUserModes?: number[]; // StyleUserMode values: Single=1, Multi=2, Duo=3
 }

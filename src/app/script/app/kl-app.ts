@@ -1558,7 +1558,7 @@ export class KlApp {
         // };
 
         const shareImage = (callback?: () => void) => {
-            KL.shareDialog({image: this.uploadImage.getLatestGeneration(), imageId: this.uploadImage.getimageId(), backendUrl: this.backendUrl, getKlCanvas: () => this.klCanvas, session: this.session, printingEnabled: this.sessionSettings.printingEnabled});
+            KL.shareDialog({image: this.uploadImage.getLatestGeneration(), imageId: this.uploadImage.getimageId(), backendUrl: this.backendUrl, getKlCanvas: () => this.klCanvas, session: this.session, printingEnabled: this.sessionSettings.printingEnabled, selectedStyle: this.selectedStyle});
         };
 
         this.saveToComputer = new KL.SaveToComputer(

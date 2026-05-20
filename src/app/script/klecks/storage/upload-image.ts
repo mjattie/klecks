@@ -1,7 +1,7 @@
 import { BB } from '../../bb/bb';
 import { KlCanvas } from '../canvas/kl-canvas';
 import { klConfig } from '../kl-config';
-import { Style } from '../ui/modals/select-style-dialog';
+import { Style } from '../kl-types';
 
 export class UploadImage {
     private timeout: number | any
@@ -79,6 +79,11 @@ export class UploadImage {
         const formData = new FormData();
         formData.append('file', data);
         formData.append('generateStyleId', this.style.id);
+        // Default to Single (1) user mode; can be extended if klecks supports multi-user modes
+        const userMode = (this.style.styleUserModes && this.style.styleUserModes.length > 0)
+            ? this.style.styleUserModes[0]
+            : 1;
+        formData.append('userMode', String(userMode));
 
         var response = await fetch(this.backendUrl + '/generate/' + this.session, {
             method: 'POST',

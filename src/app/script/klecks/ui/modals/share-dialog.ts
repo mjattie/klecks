@@ -10,6 +10,7 @@ import {theme} from '../../../theme/theme';
 
 import QRCode from 'qrcode';
 import { KlCanvas } from '../../canvas/kl-canvas';
+import { Style } from '../../kl-types';
 export async function shareDialog (
     p: {
         backendUrl: string;
@@ -17,7 +18,8 @@ export async function shareDialog (
         imageId: string,
         getKlCanvas: () => KlCanvas,
         session: string,
-        printingEnabled: boolean
+        printingEnabled: boolean,
+        selectedStyle?: Style,
     }
 ):  Promise<void> {
     const mainDiv = BB.el();
@@ -29,6 +31,11 @@ export async function shareDialog (
     const inputImage = getImage(p.getKlCanvas().getCompleteCanvas(1));
     formData.append('input-image', inputImage)
     formData.append('session', p.session)
+    if (p.selectedStyle) {
+        formData.append('styleName', p.selectedStyle.name);
+        formData.append('styleId', p.selectedStyle.id);
+    }
+    // WorkflowType.PictureThis is the default (matches the API default)
     fetch(`${p.backendUrl}/share/${p.imageId}?session=${p.session}`, {
         method: 'POST',
         body: formData,
@@ -69,7 +76,12 @@ export async function shareDialog (
                 return;
             }
             else if(result === 'Print'){
-                    fetch(p.backendUrl + "/Printing/Print?session=" + p.session, {
+                    let printUrl = p.backendUrl + "/Printing/Print?session=" + p.session;
+                    if (p.selectedStyle) {
+                        printUrl += "&styleName=" + encodeURIComponent(p.selectedStyle.name);
+                        printUrl += "&styleId=" + encodeURIComponent(p.selectedStyle.id);
+                    }
+                    fetch(printUrl, {
                         method: 'POST',
                         credentials: 'include'
                     })
