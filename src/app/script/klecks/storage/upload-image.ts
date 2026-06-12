@@ -89,6 +89,7 @@ export class UploadImage {
             method: 'POST',
             credentials: 'include',
             body: formData,
+            credentials: 'include',
         });
 
         const responseJson = await response.json();
