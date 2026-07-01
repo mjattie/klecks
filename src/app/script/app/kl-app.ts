@@ -341,7 +341,7 @@ export class KlApp {
             // init blank project
             klHistory.pause(true);
             this.klCanvas.addLayer();
-            this.klCanvas.layerFill(0, {r: 255, g: 208, b: 89});
+            this.klCanvas.layerFill(0, {r: 255, g: 255, b: 255});
             klHistory.pause(false);
         }
         try {
