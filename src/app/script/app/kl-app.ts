@@ -86,6 +86,7 @@ export type TKlAppParams = {
     embed?: KlAppOptionsEmbed;
     simpleUi: boolean;
     session: string;
+    sessionSettings?: SessionSettings; // pre-fetched so the initial canvas size can honour the model
     app?: {
         imgurKey?: string; // for imgur uploads
     };
@@ -268,11 +269,18 @@ export class KlApp {
         let exportType: TExportType = 'png';
         
         
+        // Realtime model only accepts square input -> lock the fresh canvas to 1024x1024.
+        const isRealtime = p.sessionSettings?.aiModel === REALTIME_MODEL;
         this.klCanvas = new KL.KlCanvas(
             p.project
                 ? {
                       projectObj: p.project,
                   }
+                : isRealtime
+                ? {
+                   width: REALTIME_CANVAS_SIZE,
+                   height: REALTIME_CANVAS_SIZE
+                }
                 : {
                    width: 720,
                    height: 1280
@@ -288,7 +296,7 @@ export class KlApp {
         this.session = p.session;
         this.backendUrl = process.env.BACKEND_URL ?? "";
         this.styleOptions = [];
-        this.sessionSettings = {} as SessionSettings;
+        this.sessionSettings = p.sessionSettings ?? ({} as SessionSettings);
         this.styleOptions = []; // Initialize as empty array
         this.selectedStyle = { // Default selected style before fetch
             id: 'default-initial-style', // Added default ID
@@ -308,9 +316,13 @@ export class KlApp {
         });
         // Style fetching will be done later, and will call this.styleSelectionUi.updateStyleSelection
 
-        fetch(`${this.backendUrl}/SessionSettings/GetBySession/${p.session}`, { credentials: 'include'}).then(async response => {
-            this.sessionSettings = await response.json() as SessionSettings
-        })
+        // Only fetch here if settings weren't pre-fetched (e.g. embed); standalone passes them in
+        // so the initial canvas size can already honour the model.
+        if (!p.sessionSettings) {
+            fetch(`${this.backendUrl}/SessionSettings/GetBySession/${p.session}`, { credentials: 'include'}).then(async response => {
+                this.sessionSettings = await response.json() as SessionSettings
+            })
+        }
 
         if (!p.saveReminder) {
             p.saveReminder = {
@@ -1538,9 +1550,11 @@ export class KlApp {
                         : this.uiWidth - this.toolWidth,
                 workspaceHeight: this.uiHeight,
                 onConfirm: (width, height, color) => {
+                    // Realtime model requires square input -> ignore chosen size, force 1024x1024.
+                    const realtime = this.sessionSettings?.aiModel === REALTIME_MODEL;
                     this.klCanvas.reset({
-                        width: width,
-                        height: height,
+                        width: realtime ? REALTIME_CANVAS_SIZE : width,
+                        height: realtime ? REALTIME_CANVAS_SIZE : height,
                         color: color.a === 1 ? color : undefined,
                     });
 
@@ -2115,4 +2129,10 @@ export class KlApp {
 }
 export interface SessionSettings {
     printingEnabled: boolean;
+    // Name of the configured AI model, e.g. 'ComfyUI', 'FalAi', 'FalRealtime'.
+    aiModel?: string;
 }
+
+// The realtime model requires square input; the drawing canvas is locked to this size.
+export const REALTIME_MODEL = 'FalRealtime';
+export const REALTIME_CANVAS_SIZE = 1024;

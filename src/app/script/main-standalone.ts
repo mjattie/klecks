@@ -4,7 +4,7 @@
 
 import './polyfills/polyfills';
 import { KL } from './klecks/kl';
-import { KlApp } from './app/kl-app';
+import { KlApp, SessionSettings } from './app/kl-app';
 import { IKlProject } from './klecks/kl-types';
 import { ProjectStore } from './klecks/storage/project-store';
 import { initLANG, LANG } from './language/language';
@@ -38,7 +38,11 @@ function initError(e: Error): void {
         return;
     }
 
-    function onProjectLoaded(project: IKlProject | null, projectStore: ProjectStore) {
+    function onProjectLoaded(
+        project: IKlProject | null,
+        projectStore: ProjectStore,
+        sessionSettings?: SessionSettings,
+    ) {
         if (klApp) {
             throw 'onKlProjectObjLoaded called more than once';
         }
@@ -71,7 +75,8 @@ function initError(e: Error): void {
                 saveReminder,
                 projectStore,
                 simpleUi: simpleUi ? simpleUi.toString() === 'true' : false,
-                session: sessionParam.get.toString()
+                session: sessionParam.get.toString(),
+                sessionSettings,
             }
         );
         saveReminder.init();
@@ -82,6 +87,33 @@ function initError(e: Error): void {
         }
 
         document.body.append(klApp.getEl());
+    }
+
+    function getSessionParam(): string {
+        const params = new URLSearchParams(window.location.search);
+        return (
+            params.get('session') ??
+            params.get('sessionId') ??
+            params.get('Session') ??
+            'Default'
+        );
+    }
+
+    // Pre-fetch session settings so the initial canvas size can honour the model (e.g. realtime
+    // needs a square 1024x1024 canvas). Fails soft: KlApp falls back to its own fetch + defaults.
+    async function fetchSessionSettings(session: string): Promise<SessionSettings | undefined> {
+        try {
+            const backendUrl = process.env.BACKEND_URL ?? '';
+            const response = await fetch(`${backendUrl}/SessionSettings/GetBySession/${session}`, {
+                credentials: 'include',
+            });
+            if (!response.ok) {
+                return undefined;
+            }
+            return (await response.json()) as SessionSettings;
+        } catch (e) {
+            return undefined;
+        }
     }
 
     async function onDomLoaded() {
@@ -110,7 +142,8 @@ function initError(e: Error): void {
                     }, 100);
                 }
             }
-            onProjectLoaded(project, projectStore);
+            const sessionSettings = await fetchSessionSettings(getSessionParam());
+            onProjectLoaded(project, projectStore, sessionSettings);
         } catch (e) {
             initError(e as Error);
         }
